@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	
+	<string name="app_name">Android ListView with Custom Layout and Filter</string>
+	<string name="some_text">Display and Filter some North American Countries!</string>
+	<string name="some_hint">Type here to filter&#8230;</string>
+	
+</resources>
