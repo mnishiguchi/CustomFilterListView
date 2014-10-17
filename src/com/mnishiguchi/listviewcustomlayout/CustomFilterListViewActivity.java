@@ -83,16 +83,16 @@ public class CustomFilterListViewActivity  extends Activity
 			}
 		} );
 
-		/** ??? */ 
-		EditText myFilter = (EditText) findViewById(R.id.myFilter);
-		myFilter.addTextChangedListener(new TextWatcher() {
+		/* Filter text field settings */ 
+		EditText etFilter = (EditText) findViewById(R.id.et_filter);
+		etFilter.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {  }  // Unused.
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {  }  // Unused.
 			
-			/** ??? */ 
 			public void onTextChanged(CharSequence s, int start, int before, int count)
 			{
+				// Invoke the filter on text changing.
 				dataAdapter.getFilter().filter(s.toString() );
 			}
 		} );
