@@ -26,7 +26,8 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class CustomFilterListViewActivity  extends Activity
 {
-	CustomArrayAdapter dataAdapter = null;
+	// INSTANCE VARIABLE
+	private CustomArrayAdapter mDataAdapter = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -34,16 +35,15 @@ public class CustomFilterListViewActivity  extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 	
-		//Generate list View from ArrayList
 		displayListView();
 	}
 
 	/**
-	 * 
+	 * Display a list view with a filter text field.
 	 */
 	private void displayListView()
 	{
-		//Array list of countries data
+		// Prepare a list of countries data
 		ArrayList<Country> countryList = new ArrayList<Country>();
 		Country country = new Country("AFG","Afghanistan","Asia", "Southern and Central Asia");
 		countryList.add(country);
@@ -59,21 +59,21 @@ public class CustomFilterListViewActivity  extends Activity
 		countryList.add(country);
 		country = new Country("AIA","Anguilla","North America","Caribbean");
 		countryList.add(country);
+		country = new Country("JPN","Japan","Asia","East Asia");
+		countryList.add(country);
+		country = new Country("USA","United States of America", "North America", "North America");
+		countryList.add(country);
 	
-		//Create an ArrayAdaptar from the String Array.
-		dataAdapter = new CustomArrayAdapter(this, R.layout.list_item_countries, countryList);
+		// Create an adapter.
+		mDataAdapter = new CustomArrayAdapter(this, R.layout.list_item_countries, countryList);
 		
-		// Get reference to the ListView.
+		/* ListView settings */ 
+		
 		ListView listView = (ListView) findViewById(R.id.listView1);
-		
-		// Assign adapter to the ListView.
-		listView.setAdapter(dataAdapter);
-	
-		// Enables filtering.
-		listView.setTextFilterEnabled(true);
-		
-		// Set the OnItemClickListener.
+		listView.setAdapter(mDataAdapter);
+		listView.setTextFilterEnabled(true);  // Enables filtering.
 		listView.setOnItemClickListener(new OnItemClickListener() {
+			
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
 				// When clicked, show a toast with the TextView text.
@@ -84,26 +84,30 @@ public class CustomFilterListViewActivity  extends Activity
 		} );
 
 		/* Filter text field settings */ 
+		
 		EditText etFilter = (EditText) findViewById(R.id.et_filter);
 		etFilter.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {  }  // Unused.
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {  }  // Unused.
 			
-			public void onTextChanged(CharSequence s, int start, int before, int count)
+			public void onTextChanged(CharSequence input, int start, int before, int count)
 			{
 				// Invoke the filter on text changing.
-				dataAdapter.getFilter().filter(s.toString() );
+				mDataAdapter.getFilter().filter(input.toString() );
 			}
 		} );
 	}
 
-	/** INNER CLASS */
+	/**
+	 * A custom adapter with a custom filter, designed specifically for the countries data.
+	 */
 	private class CustomArrayAdapter extends ArrayAdapter<Country>
 	{
-		private ArrayList<Country> originalList;
-		private ArrayList<Country> countryList;
-		private CountryFilter filter;
+		// INSTANCE VARIABLES
+		private ArrayList<Country> mOriginalList;  // Remember the original list.
+		private ArrayList<Country> mCountryList;  // The list to be displayed.
+		private CountryFilter mFilter;
 
 		/** CONSTRUCTOR */
 		public CustomArrayAdapter(Context context,
@@ -112,23 +116,24 @@ public class CustomFilterListViewActivity  extends Activity
 			// super constructor
 			super(context, textViewResourceId, countryList);
 			
-			this.countryList = new ArrayList<Country>();
-			this.countryList.addAll(countryList);
+			// Add to the country list all the elements of the passed-in list. 
+			this.mCountryList = new ArrayList<Country>();
+			this.mCountryList.addAll(countryList);
 			
-			// 
-			this.originalList = new ArrayList<Country>();
-			this.originalList.addAll(countryList);
+			// Add to the original list all the elements of the passed-in list. 
+			this.mOriginalList = new ArrayList<Country>();
+			this.mOriginalList.addAll(countryList);
 		}
 
 		@Override
 		public Filter getFilter()
 		{
 			// Create only one instance of the CountryFilter.
-			if (filter == null)
+			if (mFilter == null)
 			{
-				filter  = new CountryFilter();
+				mFilter  = new CountryFilter();
 			}
-			return filter;
+			return mFilter;
 		}
 
 		/** 
@@ -173,7 +178,7 @@ public class CustomFilterListViewActivity  extends Activity
 			}
 			
 			// Set the data text on each TextView.
-			Country country = countryList.get(position);
+			Country country = mCountryList.get(position);
 			holder.code.setText(country.getCode() );
 			holder.name.setText(country.getName() );
 			holder.continent.setText(country.getContinent() );
@@ -188,6 +193,8 @@ public class CustomFilterListViewActivity  extends Activity
 		 */
 		private class CountryFilter extends Filter
 		{
+			/* No instance variables*/
+			
 			/* (non-Javadoc)
 			 * Invoked in a worker thread to filter the data according to the constraint.
 			 * Performs the filtering operation.
@@ -195,27 +202,26 @@ public class CustomFilterListViewActivity  extends Activity
 			 * through the publishResults method.
 			 */
 			@Override
-			protected FilterResults performFiltering(CharSequence input)
+			protected FilterResults performFiltering(CharSequence constraint)
 			{
-				// Convert the filter constraint into a String.
-				String constraint = input.toString().toLowerCase();  // Case-insensitive.
-				
 				// Create a filter result object.
 				FilterResults result = new FilterResults();
 				
 				// Ensure that constraint exists and its length is greater than zero.
 				if (constraint != null && constraint.length() > 0)
 				{
-					// Filter the original list with the user-entered constraint.
+					// Filter the original list with the constraint (user-entered filter constraint string).
 					ArrayList<Country> filteredItems = new ArrayList<Country>();
-					for (Country country : originalList)
+					for (Country country : mOriginalList)
 					{
-						if (country.toString().toLowerCase().contains(constraint) )  // Case-insensitive.
+						if (country.toString().toLowerCase().contains(
+								constraint.toString().toLowerCase() ) )  // Case-insensitive.
 						{
 							filteredItems.add(country);
 						}
 					}
-					// Set the result data
+					
+					// Set the result data.
 					result.count = filteredItems.size();
 					result.values = filteredItems;
 				}
@@ -224,9 +230,9 @@ public class CustomFilterListViewActivity  extends Activity
 					// The synchronized keyword is used to keep variables or methods thread-safe.
 					synchronized(this)
 					{
-						// Set the result data
-						result.values = originalList;
-						result.count = originalList.size();
+						// Set the result to the original data.
+						result.values = mOriginalList;
+						result.count = mOriginalList.size();
 					}
 				}
 				return result;
@@ -241,21 +247,19 @@ public class CustomFilterListViewActivity  extends Activity
 			protected void publishResults(CharSequence constraint, FilterResults results)
 			{
 				// Retrieve the filtered data from the FilterResults.
-				countryList = (ArrayList<Country>) results.values;
+				mCountryList = (ArrayList<Country>) results.values;
 				
 				// Get refreshed any View reflecting the data set.
 				notifyDataSetChanged();
 				
-				// Remove all elements from the list.
+				// Set the adapter's list with the new data set.
 				clear();
-				
-				for (int i = 0, len = countryList.size(); i < len; i++)
+				for (int i = 0, len = mCountryList.size(); i < len; i++)
 				{
-					// Adds the specified object at the end of the array.
-					add(countryList.get(i) );
+					add(mCountryList.get(i) );
 				}
- 
-				// Once invoked, this adapter is no longer valid
+				
+				// This adapter is no longer valid. (Stop populating the list.)
 				notifyDataSetInvalidated();
 			}
 		}
