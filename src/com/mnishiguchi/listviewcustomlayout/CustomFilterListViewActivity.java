@@ -246,20 +246,22 @@ public class CustomFilterListViewActivity  extends Activity
 			@Override
 			protected void publishResults(CharSequence constraint, FilterResults results)
 			{
-				// Retrieve the filtered data from the FilterResults.
+				// Retrieve the filtered data from the FilterResults and store it.
 				mCountryList = (ArrayList<Country>) results.values;
 				
-				// Get refreshed any View reflecting the data set.
+				// Notifies the attached observers that the underlying data has been changed
+				// and any View reflecting the data set should refresh itself.
 				notifyDataSetChanged();
 				
-				// Set the adapter's list with the new data set.
+				// Clear the adapter's list and add the new data set to it.
 				clear();
 				for (int i = 0, len = mCountryList.size(); i < len; i++)
 				{
 					add(mCountryList.get(i) );
 				}
 				
-				// This adapter is no longer valid. (Stop populating the list.)
+				// Notifies the attached observers that the underlying data is no longer valid or available.
+				// Once invoked this adapter is no longer valid and should not report further data set changes.
 				notifyDataSetInvalidated();
 			}
 		}
