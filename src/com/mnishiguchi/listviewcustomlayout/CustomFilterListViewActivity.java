@@ -1,6 +1,7 @@
 package com.mnishiguchi.listviewcustomlayout;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
@@ -217,8 +218,8 @@ public class CustomFilterListViewActivity  extends Activity
 					ArrayList<Country> filteredItems = new ArrayList<Country>();
 					for (Country country : mOriginalList)
 					{
-						if (country.toString().toLowerCase().contains(
-								constraint.toString().toLowerCase() ) )  // Case-insensitive.
+						if (country.toString().toLowerCase(Locale.US).contains(
+								constraint.toString().toLowerCase(Locale.US) ) )  // Case-insensitive.
 						{
 							filteredItems.add(country);
 						}
