@@ -89,12 +89,13 @@ public class CustomFilterListViewActivity  extends Activity
 		etFilter.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {  }  // Unused.
+			
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {  }  // Unused.
 			
 			public void onTextChanged(CharSequence input, int start, int before, int count)
 			{
-				// Invoke the filter on text changing.
-				mDataAdapter.getFilter().filter(input.toString() );
+				// Call the filter with user's input.
+				mDataAdapter.getFilter().filter(input);
 			}
 		} );
 	}
@@ -106,8 +107,8 @@ public class CustomFilterListViewActivity  extends Activity
 	{
 		// INSTANCE VARIABLES
 		private ArrayList<Country> mOriginalList;  // Remember the original list.
-		private ArrayList<Country> mCountryList;  // The list to be displayed.
-		private CountryFilter mFilter;
+		private ArrayList<Country> mFilteredList;  // Remember the filtered list.
+		private CountryFilter mFilter;  // A custom filter
 
 		/** CONSTRUCTOR */
 		public CustomArrayAdapter(Context context,
@@ -116,13 +117,13 @@ public class CustomFilterListViewActivity  extends Activity
 			// super constructor
 			super(context, textViewResourceId, countryList);
 			
-			// Add to the country list all the elements of the passed-in list. 
-			this.mCountryList = new ArrayList<Country>();
-			this.mCountryList.addAll(countryList);
-			
-			// Add to the original list all the elements of the passed-in list. 
+			// Remember all the elements of the passed-in list. 
 			this.mOriginalList = new ArrayList<Country>();
 			this.mOriginalList.addAll(countryList);
+			
+			// Initialize the filtered list, initially all the elements of the passed-in list. 
+			this.mFilteredList = new ArrayList<Country>();
+			this.mFilteredList.addAll(countryList);
 		}
 
 		@Override
@@ -177,8 +178,10 @@ public class CustomFilterListViewActivity  extends Activity
 				holder = (ViewHolder) convertView.getTag();
 			}
 			
+			// Get data for this position.
+			Country country = mFilteredList.get(position);
+			
 			// Set the data text on each TextView.
-			Country country = mCountryList.get(position);
 			holder.code.setText(country.getCode() );
 			holder.name.setText(country.getName() );
 			holder.continent.setText(country.getContinent() );
@@ -195,7 +198,7 @@ public class CustomFilterListViewActivity  extends Activity
 		{
 			/* No instance variables*/
 			
-			/* (non-Javadoc)
+			/*
 			 * Invoked in a worker thread to filter the data according to the constraint.
 			 * Performs the filtering operation.
 			 * Returns a FilterResults object which will then be published in the UI thread
@@ -238,7 +241,7 @@ public class CustomFilterListViewActivity  extends Activity
 				return result;
 			}
 
-			/* (non-Javadoc)
+			/*
 			 * Invoked in the UI thread to publish the FilterResults.
 			 * Displays the results computed in the performFiltering method.
 			 */
@@ -246,23 +249,23 @@ public class CustomFilterListViewActivity  extends Activity
 			@Override
 			protected void publishResults(CharSequence constraint, FilterResults results)
 			{
-				// Retrieve the filtered data from the FilterResults and store it.
-				mCountryList = (ArrayList<Country>) results.values;
+				// Remember the filtered data.
+				mFilteredList = (ArrayList<Country>) results.values;
 				
 				// Notifies the attached observers that the underlying data has been changed
 				// and any View reflecting the data set should refresh itself.
-				notifyDataSetChanged();
+				(CustomArrayAdapter.this).notifyDataSetChanged();
 				
-				// Clear the adapter's list and add the new data set to it.
-				clear();
-				for (int i = 0, len = mCountryList.size(); i < len; i++)
+				// Clear the adapter's list and add the filtered data to it.
+				(CustomArrayAdapter.this).clear();  // Clear data in the adapter.
+				for (int i = 0, len = mFilteredList.size(); i < len; i++)
 				{
-					add(mCountryList.get(i) );
+					(CustomArrayAdapter.this).add(mFilteredList.get(i) );  // Add data to the adapter.
 				}
 				
 				// Notifies the attached observers that the underlying data is no longer valid or available.
 				// Once invoked this adapter is no longer valid and should not report further data set changes.
-				notifyDataSetInvalidated();
+				(CustomArrayAdapter.this).notifyDataSetInvalidated();
 			}
 		}
 	}
